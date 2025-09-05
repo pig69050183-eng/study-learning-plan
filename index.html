@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六年級學習計畫與進度檢核表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .rotate-90 {
+            transform: rotate(90deg);
+        }
+        .text-sm-note {
+            font-size: 0.8rem;
+            color: #4a5568;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+        .mistake-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 9999px;
+            padding: 0 6px;
+            margin-left: 8px;
+        }
+    </style>
+    <script type="module">
+        const EXAM_DATA = {
+            midterm: {
+                title: '期中考讀書計畫',
+                subjects: {
+                    chinese: {
+                        title: '國語 (L1~L6 + 成語15個 + 語文天地1、2)',
+                        lessons: [
+                            { name: 'L1 在天晴了的時候', tasks: ['課文內容', '生字部首', '詞語', '多音字及形近字', '造句', '修辭', '自修預習', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L2 珍珠鳥', tasks: ['課文內容', '生字部首', '詞語', '多音字及形近字', '造句', '修辭', '自修預習', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L3 客至', tasks: ['課文內容', '生字部首', '詞語', '多音字及形近字', '造句', '修辭', '自修預習', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L4 贏得喝采的輸家', tasks: ['課文內容', '生字部首', '詞語', '多音字及形近字', '造句', '修辭', '自修預習', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L5 哇！原來如此', tasks: ['課文內容', '生字部首', '詞語', '多音字及形近字', '造句', '修辭', '自修預習', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L6 登月先鋒', tasks: ['課文內容', '生字部首', '詞語', '多音字及形近字', '造句', '修辭', '自修預習', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: '成語15個', tasks: ['成語1', '成語2', '成語3', '成語4', '成語5', '成語6', '成語7', '成語8', '成語9', '成語10', '成語11', '成語12', '成語13', '成語14', '成語15'] },
+                            { name: '語文天地1', tasks: ['完成檢核'] },
+                            { name: '語文天地2', tasks: ['完成檢核'] }
+                        ]
+                    },
+                    english: {
+                        title: '英語 (L1~L3)',
+                        lessons: [
+                            { name: 'L1 Who\'s that young man?', tasks: ['單字', '句型', '文法', '會話', '自修', '考卷1', '考卷2'] },
+                            { name: 'L2 What are these?', tasks: ['單字', '句型', '文法', '會話', '自修', '考卷1', '考卷2'] },
+                            { name: 'L3 Let\'s get some ideas from roomgpt?', tasks: ['單字', '句型', '文法', '會話', '自修', '考卷1', '考卷2'] }
+                        ]
+                    },
+                    math: {
+                        title: '數學 (U1~U5)',
+                        lessons: [
+                            { name: 'U1 最大公因數與最小公倍數', tasks: ['1-1質數和合數', '1-2質因數和質因數分解', '1-3最大公因數', '1-4最小公倍數', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] },
+                            { name: 'U2 分數的除法', tasks: ['2-1最簡分數', '2-2同分母分數的除法', '2-3異分母分數的除法', '2-4分數除法的應用', '2-5被除數、除數和商的關係', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] },
+                            { name: 'U3 數量的關係', tasks: ['3-1和不變', '3-2差不變', '3-3商不變', '3-4積不變', '3-5堆疊問題', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] },
+                            { name: 'U4 小數的除法', tasks: ['4-1整數÷小數', '4-2小數÷小數', '4-3小數除法的應用', '4-4被除數、除數和商的關係', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] },
+                            { name: 'U5 比與比值', tasks: ['5-1比與比值', '5-2相等的比', '5-3比的應用', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] }
+                        ]
+                    },
+                    social: {
+                        title: '社會 (L1~L2)',
+                        lessons: [
+                            { name: 'L1 民主政治的發展', tasks: ['1-1臺灣人民爭取民主自由的歷程為何', '1-2民主國家政府與人民的關係為何', '1-3臺灣人民有哪些權利和義務', '自修', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L2 社會變遷下', tasks: ['2-1個人發展如何受到社會變遷的影響', '2-2族群交流如何影響臺灣社會', '自修', '評量', '考卷1', '考卷2', '考卷3'] }
+                        ]
+                    },
+                    science: {
+                        title: '自然 (L1~L2)',
+                        lessons: [
+                            { name: 'L1 多樣的天氣變化', tasks: ['活動1大氣中的水', '活動2天氣圖與天氣變化', '活動3認識颱風', '自修', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L2 熱對物質的影響', tasks: ['活動1物質受熱後的變化', '活動2熱的傳播方式', '活動3保溫與散熱', '自修', '評量', '考卷1', '考卷2', '考卷3'] }
+                        ]
+                    }
+                }
+            },
+            final: {
+                title: '期末考讀書計畫',
+                subjects: {
+                    chinese: {
+                        title: '國語 (L7~L12 + 成語15個 + 語文天地3、4)',
+                        lessons: [
+                            { name: 'L7~L12 (每課小範圍皆包含)', tasks: ['課文內容', '生字部首', '詞語', '多音字及形近字', '造句', '修辭', '自修預習', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: '成語15個', tasks: ['成語1', '成語2', '成語3', '成語4', '成語5', '成語6', '成語7', '成語8', '成語9', '成語10', '成語11', '成語12', '成語13', '成語14', '成語15'] },
+                            { name: '語文天地3', tasks: ['完成檢核'] },
+                            { name: '語文天地4', tasks: ['完成檢核'] }
+                        ]
+                    },
+                    english: {
+                        title: '英語 (L4~L6)',
+                        lessons: [
+                            { name: 'L4 I can listen to their songs again and again', tasks: ['單字', '句型', '文法', '會話', '自修', '考卷1', '考卷2'] },
+                            { name: 'L5 What are you doing?', tasks: ['單字', '句型', '文法', '會話', '自修', '考卷1', '考卷2'] },
+                            { name: 'L6 Are there any shelves outside the door?', tasks: ['單字', '句型', '文法', '會話', '自修', '考卷1', '考卷2'] }
+                        ]
+                    },
+                    math: {
+                        title: '數學 (U6~U9)',
+                        lessons: [
+                            { name: 'U6 圓周長與扇形周長', tasks: ['6-1認識圓周率', '6-2圓周長', '6-3扇形周長', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] },
+                            { name: 'U7 圓面積與扇形面積', tasks: ['7-1圓面積', '7-2扇形面積', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] },
+                            { name: 'U8 認識速率', tasks: ['8-1速率', '8-2距離、時間和速率的關係', '8-3速率單位的換算', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] },
+                            { name: 'U9 放大圖、縮圖與比例尺', tasks: ['9-1放大圖和縮圖', '9-2繪製放大圖和縮圖', '9-3比例尺', '短卷1', '短卷2', '短卷3', '短卷4', '練習本'] }
+                        ]
+                    },
+                    social: {
+                        title: '社會 (L3~L4)',
+                        lessons: [
+                            { name: 'L3 戰後經濟發展、轉型與生活', tasks: ['3-1臺灣如何發展成為科技島', '3-2臺灣如何發展成為科技島', '自修', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L4 都市、鄉村的互動與發展', tasks: ['4-1都市與鄉村為什麼會互動交流', '4-2都市化與工業化如何影響人們的生活', '4-3都市與鄉村為什麼需要邁向永續發展', '自修', '評量', '考卷1', '考卷2', '考卷3'] }
+                        ]
+                    },
+                    science: {
+                        title: '自然 (L3~L4)',
+                        lessons: [
+                            { name: 'L3 變動的大地', tasks: ['活動1流水的作用', '活動2岩石與礦物', '活動3土壤與化石', '自修', '評量', '考卷1', '考卷2', '考卷3'] },
+                            { name: 'L4 奇妙的電磁世界', tasks: ['活動1指北針與地磁', '活動2神奇的電磁鐵', '活動3認識電磁波', '自修', '評量', '考卷1', '考卷2', '考卷3'] }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const HOLIDAY_NOTES = {
+            '2025-09-29': '孔誕(放假)',
+            '2025-10-06': '中秋節(放假)',
+            '2025-10-10': '國慶日(放假)',
+            '2025-10-24': '台灣光復節(放假)',
+            '2025-11-03': '期中評量',
+            '2025-11-04': '期中評量',
+            '2025-12-20': '運動會',
+            '2025-12-26': '運動會補假(放假)',
+            '2026-01-14': '期末評量',
+            '2026-01-15': '期末評量',
+            '2026-01-20': '休業式',
+            '2026-02-23': '寒假結束',
+            '2026-02-27': '和平紀念日(放假)',
+            '2026-03-25': '六年級戶外教育',
+            '2026-03-26': '六年級戶外教育',
+            '2026-03-27': '六年級戶外教育',
+            '2026-04-03': '兒童節(放假)',
+            '2026-04-06': '清明節(放假)',
+            '2026-04-16': '期中評量',
+            '2026-04-17': '期中評量',
+            '2026-05-01': '勞動節(放假)',
+            '2026-06-02': '畢業考',
+            '2026-06-03': '畢業考',
+            '2026-06-14': '畢業典禮(暫定)'
+        };
+
+        const SUBJECT_MISTAKE_TIPS = {
+            chinese: {
+                placeholder: '輸入國語錯題詳情，例如：詞語「躊躇」的解釋錯誤',
+                example: '國語: 詞語「躊躇」的解釋錯誤'
+            },
+            english: {
+                placeholder: '輸入英語錯題詳情，例如：have的第三人稱單數動詞是has',
+                example: '英語: `have`的第三人稱單數動詞是`has`'
+            },
+            math: {
+                placeholder: '輸入數學錯題詳情，例如：圓周長公式記錯',
+                example: '數學: 圓周長公式記錯'
+            },
+            social: {
+                placeholder: '輸入社會錯題詳情，例如：都市化對鄉村的影響',
+                example: '社會: 都市化對鄉村的影響'
+            },
+            science: {
+                placeholder: '輸入自然錯題詳情，例如：熱傳播的三種方式',
+                example: '自然: 熱傳播的三種方式'
+            },
+            default: {
+                placeholder: '請在此輸入錯題詳情，每題一行...',
+                example: '此處可以輸入任何科目的錯題，每行一題。'
+            }
+        };
+
+        const today = new Date();
+        let currentYear = today.getFullYear();
+        let currentMonth = today.getMonth();
+        let selectedDate = null;
+        
+        // 嘗試從 localStorage 載入資料，如果沒有則使用預設值
+        const loadFromLocalStorage = (key, defaultValue) => {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : defaultValue;
+        };
+
+        let notes = loadFromLocalStorage('notes', {});
+        let progressData = loadFromLocalStorage('progressData', {});
+        let mistakesData = loadFromLocalStorage('mistakesData', {});
+
+        // 初始化資料，將假期資料合併進筆記
+        Object.assign(notes, HOLIDAY_NOTES);
+
+        const hideLoading = () => {
+            const loadingSection = document.getElementById('loading-section');
+            if (loadingSection) {
+                loadingSection.style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }
+        };
+
+        // 新增儲存到 localStorage 的函式
+        const saveToLocalStorage = (key, data) => {
+            localStorage.setItem(key, JSON.stringify(data));
+        };
+
+        const saveNote = (date, note) => {
+            notes[date] = note;
+            saveToLocalStorage('notes', notes);
+            console.log("備忘錄已更新並儲存：", notes);
+        };
+        
+        const saveMistakes = (mistakeId, mistakeContent) => {
+            mistakesData[mistakeId] = mistakeContent;
+            saveToLocalStorage('mistakesData', mistakesData);
+            console.log("錯題紀錄已更新並儲存：", mistakesData);
+        };
+        
+        const saveProgress = () => {
+            saveToLocalStorage('progressData', progressData);
+            console.log("學習進度已更新並儲存：", progressData);
+        };
+
+        const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+        const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
+
+        const renderCalendar = () => {
+            const datesContainer = document.querySelector('.dates');
+            const monthHeader = document.querySelector('.month');
+            datesContainer.innerHTML = '';
+            
+            const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+            const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+
+            monthHeader.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDate = document.createElement('div');
+                datesContainer.appendChild(emptyDate);
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateElement = document.createElement('div');
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                dateElement.classList.add('date', 'relative', 'p-4', 'rounded-lg', 'bg-gray-100', 'hover:bg-gray-200', 'transition-colors', 'duration-200', 'cursor-pointer', 'min-h-[100px]');
+                dateElement.innerHTML = `<span class="font-bold">${i}</span>`;
+                
+                if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                    dateElement.classList.add('border-2', 'border-blue-500');
+                }
+
+                if (new Date(currentYear, currentMonth, i).getDay() === 0 || new Date(currentYear, currentMonth, i).getDay() === 6) {
+                    dateElement.classList.add('text-red-500');
+                }
+
+                if (notes[dateStr]) {
+                    dateElement.innerHTML += `<div class="mt-2 text-sm-note">${notes[dateStr]}</div>`;
+                }
+
+                dateElement.addEventListener('click', () => {
+                    selectedDate = dateStr;
+                    openNoteModal();
+                });
+                datesContainer.appendChild(dateElement);
+            }
+        };
+
+        const openNoteModal = () => {
+            const modal = document.getElementById('event-modal');
+            const noteTextarea = document.getElementById('note-textarea');
+            const dateTitle = document.getElementById('modal-date');
+            
+            dateTitle.textContent = selectedDate;
+            noteTextarea.value = notes[selectedDate] || '';
+            modal.style.display = 'flex';
+        };
+
+        const closeNoteModal = () => {
+            const modal = document.getElementById('event-modal');
+            modal.style.display = 'none';
+        };
+        
+        const openMistakeModal = (examId, subjectId, lessonName) => {
+            const modal = document.getElementById('mistake-modal');
+            const mistakeTextarea = document.getElementById('mistake-textarea');
+            const modalTitle = document.getElementById('mistake-modal-title');
+            const mistakeTips = document.getElementById('mistake-tips');
+            
+            const mistakeId = `${examId}-${subjectId}-${lessonName}-mistakes`;
+            modalTitle.textContent = `${lessonName} 錯題詳情`;
+            
+            const tips = SUBJECT_MISTAKE_TIPS[subjectId] || SUBJECT_MISTAKE_TIPS.default;
+            mistakeTextarea.placeholder = tips.placeholder;
+            mistakeTips.innerHTML = `例如：${tips.example}`;
+            
+            mistakeTextarea.value = mistakesData[mistakeId] || '';
+            modal.dataset.mistakeId = mistakeId;
+            modal.dataset.subjectId = subjectId;
+            modal.style.display = 'flex';
+        };
+
+        const closeMistakeModal = () => {
+            const modal = document.getElementById('mistake-modal');
+            modal.style.display = 'none';
+        };
+
+        const updateProgress = () => {
+            const examSections = ['midterm', 'final'];
+            
+            examSections.forEach(examId => {
+                const examProgressDiv = document.getElementById(`${examId}-exam-progress`);
+                let totalExamTasks = 0;
+                let completedExamTasks = 0;
+
+                const subjects = EXAM_DATA[examId].subjects;
+                for (const subjectId in subjects) {
+                    const subjectProgressDiv = document.getElementById(`${subjectId}-subject-progress`);
+                    const subjectProgressLabel = document.getElementById(`${subjectId}-subject-label`);
+                    const subjectCanvas = document.getElementById(`${subjectId}-chart`);
+
+                    let totalSubjectTasks = 0;
+                    let completedSubjectTasks = 0;
+                    
+                    const chartLabels = [];
+                    const chartProgressData = [];
+                    const chartMistakesData = [];
+
+                    const lessons = subjects[subjectId].lessons;
+                    lessons.forEach(lesson => {
+                        let totalLessonTasks = 0;
+                        let completedLessonTasks = 0;
+                        lesson.tasks.forEach(task => {
+                            const taskId = `${examId}-${subjectId}-${lesson.name}-${task}`;
+                            totalLessonTasks++;
+                            if (progressData[taskId]) {
+                                completedLessonTasks++;
+                            }
+                        });
+
+                        totalSubjectTasks += totalLessonTasks;
+                        completedSubjectTasks += completedLessonTasks;
+
+                        const lessonPercentage = totalLessonTasks > 0 ? (completedLessonTasks / totalLessonTasks) * 100 : 0;
+                        const lessonProgressDiv = document.getElementById(`${examId}-${subjectId}-${lesson.name}-progress`);
+                        if (lessonProgressDiv) {
+                            lessonProgressDiv.style.width = `${lessonPercentage.toFixed(0)}%`;
+                        }
+                        const lessonProgressLabel = document.getElementById(`${examId}-${subjectId}-${lesson.name}-label`);
+                        if (lessonProgressLabel) {
+                            lessonProgressLabel.textContent = `${completedLessonTasks}/${totalLessonTasks} (${lessonPercentage.toFixed(0)}%)`;
+                        }
+
+                        // Get mistake count for display
+                        const mistakeId = `${examId}-${subjectId}-${lesson.name}-mistakes`;
+                        const mistakeText = mistakesData[mistakeId] || '';
+                        const mistakeCount = mistakeText.split('\n').filter(line => line.trim() !== '').length;
+
+                        const mistakeCountElement = document.getElementById(`${mistakeId}-count`);
+                        if (mistakeCountElement) {
+                            mistakeCountElement.textContent = mistakeCount;
+                            if (mistakeCount > 0) {
+                                mistakeCountElement.style.display = 'flex';
+                            } else {
+                                mistakeCountElement.style.display = 'none';
+                            }
+                        }
+
+                        // Update chart data
+                        chartLabels.push(lesson.name);
+                        chartProgressData.push(lessonPercentage.toFixed(0));
+                        chartMistakesData.push(mistakeCount);
+                    });
+
+                    // Render chart
+                    if (subjectCanvas) {
+                        if (subjectCanvas.chart) {
+                            subjectCanvas.chart.destroy(); // 銷毀舊圖表
+                        }
+                        subjectCanvas.chart = new Chart(subjectCanvas, {
+                            type: 'bar',
+                            data: {
+                                labels: chartLabels,
+                                datasets: [{
+                                    label: '完成度 (%)',
+                                    data: chartProgressData,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: '錯題數',
+                                    data: chartMistakesData,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1,
+                                    yAxisID: 'y1'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        type: 'linear',
+                                        display: true,
+                                        position: 'left',
+                                        title: {
+                                            display: true,
+                                            text: '完成度 (%)'
+                                        },
+                                        beginAtZero: true,
+                                        max: 100
+                                    },
+                                    y1: {
+                                        type: 'linear',
+                                        display: true,
+                                        position: 'right',
+                                        grid: {
+                                            drawOnChartArea: false
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: '錯題數'
+                                        },
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1,
+                                            precision: 0
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            title: function(context) {
+                                                return context[0].label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    totalExamTasks += totalSubjectTasks;
+                    completedExamTasks += completedSubjectTasks;
+
+                    const subjectPercentage = totalSubjectTasks > 0 ? (completedSubjectTasks / totalSubjectTasks) * 100 : 0;
+                    if (subjectProgressDiv) {
+                        subjectProgressDiv.style.width = `${subjectPercentage.toFixed(0)}%`;
+                    }
+                    if (subjectProgressLabel) {
+                        subjectProgressLabel.textContent = `${completedSubjectTasks}/${totalSubjectTasks} (${subjectPercentage.toFixed(0)}%)`;
+                    }
+                }
+
+                const examPercentage = totalExamTasks > 0 ? (completedExamTasks / totalExamTasks) * 100 : 0;
+                if (examProgressDiv) {
+                    examProgressDiv.style.width = `${examPercentage.toFixed(0)}%`;
+                }
+                const examLabel = document.getElementById(`${examId}-exam-label`);
+                if (examLabel) {
+                    examLabel.textContent = `${completedExamTasks}/${totalExamTasks} (${examPercentage.toFixed(0)}%)`;
+                }
+            });
+        };
+
+        const renderStudyPlan = () => {
+            const container = document.getElementById('study-plan-container');
+            container.innerHTML = '';
+            
+            for (const examId in EXAM_DATA) {
+                const exam = EXAM_DATA[examId];
+                
+                const examSection = document.createElement('div');
+                examSection.innerHTML = `
+                    <div class="bg-blue-500 text-white rounded-t-lg p-4 cursor-pointer flex justify-between items-center" id="${examId}-toggle-header">
+                        <h2 class="text-xl font-bold">${exam.title}</h2>
+                        <svg class="w-6 h-6 transform transition-transform duration-300" id="${examId}-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <div id="${examId}-section-content" class="p-4 bg-gray-50 rounded-b-lg">
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold text-gray-600">總體進度</span>
+                                <span class="text-sm font-semibold text-gray-600" id="${examId}-exam-label">0/0 (0%)</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" id="${examId}-exam-progress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(examSection);
+                
+                const examContentDiv = examSection.querySelector(`#${examId}-section-content`);
+                
+                for (const subjectId in exam.subjects) {
+                    const subject = exam.subjects[subjectId];
+                    const subjectDiv = document.createElement('div');
+                    subjectDiv.className = "mb-4";
+                    subjectDiv.innerHTML = `
+                        <div class="bg-white rounded-lg p-3 shadow-sm cursor-pointer flex justify-between items-center transition-transform transform hover:scale-[1.01]" id="${subjectId}-subject-header">
+                            <span class="font-medium text-gray-800">${subject.title}</span>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-green-500 h-2 rounded-full transition-all duration-500" id="${subjectId}-subject-progress" style="width: 0%;"></div>
+                                </div>
+                                <span class="text-xs text-gray-500 w-12" id="${subjectId}-subject-label">0/0 (0%)</span>
+                                <svg class="w-4 h-4 text-gray-400 transform transition-transform duration-300 ml-2" id="${subjectId}-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <ul id="${subjectId}-lessons-list" class="mt-2 space-y-2 p-4 hidden bg-white rounded-lg shadow-inner">
+                            <div class="h-64 mb-4">
+                                <canvas id="${subjectId}-chart"></canvas>
+                            </div>
+                        </ul>
+                    `;
+                    examContentDiv.appendChild(subjectDiv);
+                    
+                    const lessonsList = subjectDiv.querySelector(`#${subjectId}-lessons-list`);
+                    
+                    subject.lessons.forEach((lesson, lessonIndex) => {
+                        const lessonDiv = document.createElement('li');
+                        lessonDiv.innerHTML = `
+                            <div class="flex flex-col mb-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-gray-700">${lesson.name}</span>
+                                    <button class="text-xs text-blue-500 hover:text-blue-700 transition-colors duration-200 flex items-center" data-exam-id="${examId}" data-subject-id="${subjectId}" data-lesson-name="${lesson.name}">
+                                        錯題紀錄
+                                        <span id="${examId}-${subjectId}-${lesson.name}-mistakes-count" class="mistake-count">0</span>
+                                    </button>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                    <div class="bg-blue-400 h-1.5 rounded-full transition-all duration-500" id="${examId}-${subjectId}-${lesson.name}-progress" style="width: 0%;"></div>
+                                </div>
+                                <span class="text-xs text-gray-500 mt-1" id="${examId}-${subjectId}-${lesson.name}-label">0/0 (0%)</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"></div>
+                        `;
+                        const taskGrid = lessonDiv.querySelector('div.grid');
+                        lesson.tasks.forEach((task, taskIndex) => {
+                            const taskId = `${examId}-${subjectId}-${lesson.name}-${task}`;
+                            const isChecked = progressData[taskId] || false;
+                            
+                            const taskDiv = document.createElement('div');
+                            taskDiv.className = 'flex items-center p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors duration-200';
+                            taskDiv.innerHTML = `
+                                <input type="checkbox" id="${taskId}" class="form-checkbox h-4 w-4 text-green-600 rounded-md focus:ring-green-500 cursor-pointer" ${isChecked ? 'checked' : ''}>
+                                <label for="${taskId}" class="ml-2 text-sm text-gray-700 flex-1 cursor-pointer select-none">${task}</label>
+                            `;
+                            taskDiv.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                                progressData[taskId] = e.target.checked;
+                                saveProgress();
+                                updateProgress();
+                            });
+                            taskGrid.appendChild(taskDiv);
+                        });
+                        lessonsList.appendChild(lessonDiv);
+                        lessonDiv.querySelector('button').addEventListener('click', (e) => {
+                            const { examId, subjectId, lessonName } = e.currentTarget.dataset;
+                            openMistakeModal(examId, subjectId, lessonName);
+                        });
+                    });
+                    
+                    subjectDiv.querySelector(`#${subjectId}-subject-header`).addEventListener('click', () => {
+                        lessonsList.classList.toggle('hidden');
+                        subjectDiv.querySelector(`#${subjectId}-arrow`).classList.toggle('rotate-90');
+                        updateProgress(); // 更新圖表
+                    });
+                }
+                
+                examSection.querySelector(`#${examId}-toggle-header`).addEventListener('click', () => {
+                    examContentDiv.classList.toggle('hidden');
+                    examSection.querySelector(`#${examId}-arrow`).classList.toggle('rotate-90');
+                });
+            }
+            updateProgress();
+        };
+
+        window.onload = () => {
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar();
+            });
+
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            });
+
+            document.getElementById('save-note-btn').addEventListener('click', () => {
+                const noteTextarea = document.getElementById('note-textarea');
+                saveNote(selectedDate, noteTextarea.value);
+                closeNoteModal();
+                renderCalendar(); // Refresh calendar to show the saved note
+            });
+            document.querySelector('.close-note-button').addEventListener('click', closeNoteModal);
+            
+            document.getElementById('save-mistake-btn').addEventListener('click', () => {
+                const modal = document.getElementById('mistake-modal');
+                const mistakeId = modal.dataset.mistakeId;
+                const mistakeTextarea = document.getElementById('mistake-textarea');
+                saveMistakes(mistakeId, mistakeTextarea.value);
+                closeMistakeModal();
+                updateProgress(); // 更新圖表以反映錯題數量
+            });
+            document.querySelector('.close-mistake-button').addEventListener('click', closeMistakeModal);
+
+            // 載入完成後直接渲染畫面
+            renderCalendar();
+            renderStudyPlan();
+            hideLoading();
+        };
+    </script>
+</head>
+<body class="bg-gray-100 p-4 font-sans">
+    
+    <div id="loading-section" class="flex items-center justify-center min-h-screen">
+        <p class="text-xl text-gray-500">載入中... 請稍候</p>
+    </div>
+
+    <div id="main-content" class="max-w-4xl mx-auto space-y-6 hidden">
+
+        <!-- Header -->
+        <header class="text-center py-6 bg-white rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-gray-800">六年級學習計畫與進度檢核表</h1>
+            <p class="mt-2 text-gray-500">期中、期末考高分計畫，從今天開始！</p>
+        </header>
+
+        <!-- Calendar Section -->
+        <section class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">學習行事曆</h2>
+            <div class="flex justify-between items-center mb-4">
+                <button id="prevMonth" class="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <span class="month text-2xl font-bold text-gray-800"></span>
+                <button id="nextMonth" class="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center font-medium text-gray-500">
+                <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+            </div>
+            <div class="dates grid grid-cols-7 gap-1 mt-2"></div>
+        </section>
+
+        <!-- Study Plan Section -->
+        <section class="bg-white p-6 rounded-lg shadow-md" id="study-plan-container">
+            <!-- Dynamic content will be rendered here by JavaScript -->
+        </section>
+
+        <!-- Modal for notes -->
+        <div id="event-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modal-date" class="text-lg font-semibold text-gray-800"></h3>
+                    <button class="close-note-button text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                </div>
+                <textarea id="note-textarea" rows="4" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="輸入今天的學習筆記或待辦事項..."></textarea>
+                <div class="flex justify-end mt-4">
+                    <button id="save-note-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">儲存</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal for mistakes -->
+        <div id="mistake-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="mistake-modal-title" class="text-lg font-semibold text-gray-800"></h3>
+                    <button class="close-mistake-button text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">請在此輸入錯題詳情，每題一行。例如：</p>
+                <ul class="list-disc list-inside text-xs text-gray-500 mb-4 space-y-1">
+                    <li id="mistake-tips"></li>
+                </ul>
+                <textarea id="mistake-textarea" rows="8" class="w-full p-2 border rounded-md focus:ring-red-500 focus:border-red-500 text-sm"></textarea>
+                <div class="flex justify-end mt-4">
+                    <button id="save-mistake-btn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200">儲存錯題</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
